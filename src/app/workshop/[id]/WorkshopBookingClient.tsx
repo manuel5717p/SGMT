@@ -39,10 +39,17 @@ const getNext7Days = () => {
     for (let i = 0; i < 7; i++) {
         const d = new Date(today)
         d.setDate(today.getDate() + i)
+
+        // Fix: Use local date components to avoid UTC shift
+        const year = d.getFullYear()
+        const month = String(d.getMonth() + 1).padStart(2, '0')
+        const day = String(d.getDate()).padStart(2, '0')
+        const fullDate = `${year}-${month}-${day}`
+
         dates.push({
             day: days[d.getDay()],
             date: d.getDate(),
-            fullDate: d.toISOString().split('T')[0], // YYYY-MM-DD
+            fullDate: fullDate, // YYYY-MM-DD in local time
             month: d.getMonth()
         })
     }
@@ -132,7 +139,11 @@ export default function WorkshopBookingClient({ workshop, services }: WorkshopBo
 
         try {
             await createReservation(formData)
-        } catch (error) {
+        } catch (error: any) {
+            // Fix: Handle Next.js redirect error
+            if (error.message === 'NEXT_REDIRECT' || error.digest?.startsWith('NEXT_REDIRECT')) {
+                throw error
+            }
             console.error(error)
             alert("Error al crear la reserva")
             setIsPending(false)

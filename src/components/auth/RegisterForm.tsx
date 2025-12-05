@@ -96,7 +96,7 @@ export function RegisterForm({ role, roleName }: RegisterFormProps) {
                     </div>
                     <div className="space-y-2">
                         <h2 className="text-xl font-bold text-slate-900">¡Cuenta creada exitosamente!</h2>
-                        <p className="text-slate-500">Usted se registró correctamente como {roleName}</p>
+                        <p className="text-slate-500">Confirme la creación de su nueva cuenta en su correo y podrá registrarse en nuestro sitio web.</p>
                     </div>
                     <Button asChild className="w-full bg-green-600 hover:bg-green-700 text-white">
                         <Link href="/auth/login">Ir al Login</Link>

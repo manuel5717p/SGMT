@@ -75,11 +75,10 @@ export async function registerUser(formData: FormData) {
 
 
     if (data.session) {
-        if (role === 'client') {
-            redirect('/search')
-        } else if (role === 'admin') {
+        if (role === 'admin') {
             redirect('/admin/dashboard')
         }
+        // For clients, we don't redirect here to allow the frontend to show the success message
     }
 
     return { success: true }

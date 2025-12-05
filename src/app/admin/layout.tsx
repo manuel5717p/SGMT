@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase-server"
-import { headers } from "next/headers"
+import { WorkshopGuard } from "@/components/auth/WorkshopGuard"
 
 export default async function AdminLayout({
     children,
@@ -22,22 +22,9 @@ export default async function AdminLayout({
         .eq('owner_id', user.id)
         .single()
 
-    const headersList = await headers()
-    const pathname = headersList.get("x-invoke-path") || ""
-
-    // If no workshop and NOT on new-workshop page, redirect to onboarding
-    if (!workshop && !pathname.includes('/admin/new-workshop')) {
-        redirect('/admin/new-workshop')
-    }
-
-    // If workshop exists and ON new-workshop page, redirect to dashboard
-    if (workshop && pathname.includes('/admin/new-workshop')) {
-        redirect('/admin/dashboard')
-    }
-
     return (
-        <>
+        <WorkshopGuard hasWorkshop={!!workshop}>
             {children}
-        </>
+        </WorkshopGuard>
     )
 }
