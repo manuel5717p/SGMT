@@ -1,95 +1,158 @@
-import { SlidersHorizontal, MapPin } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { WorkshopListCard } from "@/components/shared/WorkshopListCard"
-import { supabase } from "@/lib/supabase"
-import { ClientNavbar } from "@/components/shared/ClientNavbar"
+'use client';
 
-export default async function SearchPage({
-    searchParams,
-}: {
-    searchParams: Promise<{ q?: string }>
-}) {
-    const { q } = await searchParams
+import { useState, useEffect, useMemo, useRef, createRef } from 'react';
+import dynamic from 'next/dynamic';
+import { supabase } from '@/lib/supabase';
+import { Navbar } from './components/Navbar';
+import { FilterBar } from './components/FilterBar';
+import { WorkshopCard } from './components/WorkshopCard';
+import { Workshop } from './types';
+import { useLocation } from '@/hooks/useLocation';
+import { calculateDistance } from '@/utils/distance';
 
-    let query = supabase.from('workshops').select('*')
+// Dynamic Import for Map to avoid SSR issues
+const WorkshopMap = dynamic(() => import('./components/WorkshopMap'), {
+    ssr: false,
+    loading: () => <div className="w-full h-full bg-gray-100 animate-pulse flex items-center justify-center text-gray-400">Cargando Mapa...</div>
+});
 
-    if (q) {
-        query = query.ilike('district', `%${q}%`)
+export default function SearchPage() {
+    const [workshops, setWorkshops] = useState<Workshop[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [currentLocationName, setCurrentLocationName] = useState('Los Olivos'); // Default/Initial
+    const [selectedWorkshopId, setSelectedWorkshopId] = useState<string | null>(null);
+
+    const { location: userLocation, setLocation, requestLocation } = useLocation();
+
+    // Refs for scrolling to cards
+    // Casting to any to avoid strict RefObject<T> vs RefObject<T|null> issues for now if necessary, or just using RefObject<HTMLDivElement>
+    const cardRefs = useRef<{ [key: string]: React.RefObject<HTMLDivElement | null> }>({});
+
+    useEffect(() => {
+        fetchWorkshops();
+    }, []);
+
+    async function fetchWorkshops() {
+        setLoading(true);
+        const { data, error } = await supabase
+            .from('workshops_with_rating')
+            .select('*');
+
+        if (error) {
+            console.error('Error fetching workshops:', error);
+        } else {
+            setWorkshops(data || []);
+            // Initialize refs
+            (data || []).forEach((w: Workshop) => {
+                // React.createRef returns { current: null } which is compatible with RefObject<HTMLDivElement | null>
+                cardRefs.current[w.id] = createRef<HTMLDivElement>();
+            });
+        }
+        setLoading(false);
     }
 
-    const { data: workshops } = await query
+    const handleUseMyLocation = () => {
+        requestLocation();
+        setCurrentLocationName('Mi Ubicación');
+    };
+
+    const handleLocationSelect = (locName: string) => {
+        // Logic to get coords for the district could go here
+        // For now just update the name
+        setCurrentLocationName(locName);
+        // Ideally we would set useLocation to the center of that district
+    };
+
+    const handleMarkerClick = (id: string) => {
+        setSelectedWorkshopId(id);
+        const ref = cardRefs.current[id];
+        if (ref && ref.current) {
+            ref.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    };
+
+    const filteredWorkshops = useMemo(() => {
+        // 1. Calculate Distances if userLocation exists
+        let data = workshops.map(w => {
+            if (userLocation) {
+                const dist = calculateDistance(userLocation.lat, userLocation.lng, w.location_lat, w.location_lng);
+                return { ...w, distance: dist };
+            }
+            return { ...w, distance: undefined };
+        });
+
+        // 2. Filter by Search Term
+        if (searchTerm) {
+            const lower = searchTerm.toLowerCase();
+            data = data.filter(w =>
+                w.name.toLowerCase().includes(lower) ||
+                (w.address && w.address.toLowerCase().includes(lower))
+            );
+        }
+
+        // 3. Sort by distance if available, otherwise rating?
+        // Mockup shows "Talleres cercanos", so distance sort is implied.
+        if (userLocation) {
+            data.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+        }
+
+        return data;
+    }, [workshops, userLocation, searchTerm]);
+
 
     return (
-        <div className="flex flex-col h-screen bg-slate-50">
-            {/* Header */}
-            <ClientNavbar />
+        <div className="h-screen flex flex-col bg-gray-50">
+            <Navbar />
+            <FilterBar
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                onLocationSelect={handleLocationSelect}
+                onUseMyLocation={handleUseMyLocation}
+                currentLocationName={currentLocationName}
+                onCoordinatesChange={(lat, lng) => setLocation({ lat, lng })}
+            />
 
-            {/* Sub-Header for Search (Mobile/Desktop) */}
-            <div className="bg-white px-4 py-3 shadow-sm z-10 border-t border-slate-100">
-                <div className="flex items-center gap-3 max-w-7xl mx-auto">
-                    <form action="/search" className="flex-1 relative">
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                        <Input
-                            name="q"
-                            defaultValue={q}
-                            placeholder="Buscar por distrito..."
-                            className="pl-9 bg-slate-50 border-slate-200 h-10 text-sm"
-                        />
-                    </form>
-                    <Button size="icon" variant="outline" className="h-10 w-10 shrink-0 border-slate-200 text-slate-600 bg-green-500 hover:bg-green-600 hover:text-white border-none">
-                        <SlidersHorizontal className="h-4 w-4 text-white" />
-                    </Button>
-                </div>
-            </div>
-
-            {/* Map Placeholder (Top Half) */}
-            <div className="h-[40vh] bg-slate-200 relative w-full overflow-hidden flex items-center justify-center">
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-                <div className="text-slate-400 font-medium flex flex-col items-center gap-2">
-                    <MapPin className="h-8 w-8" />
-                    <span>Google Maps Here</span>
+            <div className="flex-1 flex overflow-hidden">
+                {/* Map Section - Left (or Top on mobile, but req says Split Screen) */}
+                <div className="w-2/3 relative border-r hidden md:block">
+                    <WorkshopMap
+                        workshops={filteredWorkshops}
+                        userLocation={userLocation}
+                        onMarkerClick={handleMarkerClick}
+                        selectedWorkshopId={selectedWorkshopId}
+                    />
+                    {/* Map Branding Overlay if needed, or attribution is enough */}
                 </div>
 
-                {/* Mock Map Pins */}
-                <div className="absolute top-1/4 left-1/4">
-                    <MapPin className="h-8 w-8 text-green-500 fill-green-500 drop-shadow-md" />
-                </div>
-                <div className="absolute top-1/2 right-1/3">
-                    <MapPin className="h-8 w-8 text-green-500 fill-green-500 drop-shadow-md" />
-                </div>
-                <div className="absolute bottom-1/3 left-1/2">
-                    <MapPin className="h-8 w-8 text-green-500 fill-green-500 drop-shadow-md" />
-                </div>
-            </div>
-
-            {/* Workshop List (Bottom Half) */}
-            <div className="flex-1 overflow-y-auto bg-slate-50 -mt-4 rounded-t-3xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-0 relative">
-                <div className="p-4 space-y-4 pb-24">
-                    <div className="flex items-center justify-between px-1">
-                        <h2 className="font-bold text-slate-900 text-lg">Talleres cercanos</h2>
-                        <span className="text-xs text-slate-500">{workshops?.length || 0} talleres encontrados</span>
+                {/* List Section - Right */}
+                <div className="w-full md:w-1/3 overflow-y-auto px-4 py-6">
+                    <div className="mb-4">
+                        <h2 className="text-gray-700 font-medium">Talleres cercanos</h2>
+                        <p className="text-sm text-gray-500">{filteredWorkshops.length} talleres encontrados</p>
                     </div>
 
-                    <div className="space-y-3">
-                        {workshops?.map((workshop) => (
-                            <WorkshopListCard
+                    <div className="space-y-4">
+                        {loading ? (
+                            <div className="text-center py-10 text-gray-500">Cargando talleres...</div>
+                        ) : filteredWorkshops.map((workshop) => (
+                            <WorkshopCard
                                 key={workshop.id}
-                                id={workshop.id}
-                                name={workshop.name}
-                                rating={0}
-                                reviewCount={0}
-                                distance={"0.5km"}
+                                ref={cardRefs.current[workshop.id] as React.RefObject<HTMLDivElement>}
+                                workshop={workshop}
+                                distance={workshop.distance}
+                                active={selectedWorkshopId === workshop.id}
                             />
                         ))}
-                        {(!workshops || workshops.length === 0) && (
-                            <div className="text-center py-10 text-slate-500 text-sm">
-                                No se encontraron talleres{q ? ` en "${q}"` : ''}.
+
+                        {!loading && filteredWorkshops.length === 0 && (
+                            <div className="text-center py-10 text-gray-500">
+                                No se encontraron talleres con esos filtros.
                             </div>
                         )}
                     </div>
                 </div>
             </div>
         </div>
-    )
+    );
 }

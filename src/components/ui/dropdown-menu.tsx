@@ -37,7 +37,7 @@ const DropdownMenuTrigger = ({ asChild, children }: { asChild?: boolean; childre
     const context = React.useContext(DropdownMenuContext)
     if (!context) throw new Error("DropdownMenuTrigger must be used within DropdownMenu")
 
-    const child = React.Children.only(children) as React.ReactElement
+    const child = React.Children.only(children) as React.ReactElement<any>
 
     return React.cloneElement(child, {
         onClick: (e: React.MouseEvent) => {
