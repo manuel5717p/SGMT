@@ -1,41 +1,67 @@
-# Motorcycle Workshop SaaS
+# Plataforma SaaS para Talleres de Motos
 
-This is a SaaS application for managing motorcycle workshops, built with Next.js 15.
+Esta es una aplicación SaaS integral para descubrir y reservar servicios en talleres de motocicletas, construida con Next.js 15, Supabase y Tailwind CSS.
 
-## Tech Stack
+## Características
+
+### 🔍 Búsqueda y Descubrimiento (`/search`)
+- **Diseño de Vista Dual**: Interfaz de pantalla dividida con un mapa dinámico y una lista de talleres.
+- **Mapa Interactivo**: Impulsado por **Leaflet**, con marcadores personalizados, animaciones de zoom suaves (`FlyTo`) y seguimiento de ubicación del usuario.
+- **Filtrado Avanzado**: Filtra talleres por nombre de servicio, tipo de problema o ubicación.
+- **Servicios de Ubicación**:
+    - **Geolocalización**: Detecta automáticamente la posición del usuario para cálculos de distancia.
+    - **Búsqueda de Direcciones**: Integración con **Nominatim API** (OpenStreetMap) para buscar distritos o direcciones específicas en Perú.
+
+### 📅 Sistema de Reservas (`/book/[id]`)
+- **Páginas Dinámicas de Talleres**: Obtiene detalles del taller, imágenes y horarios de atención en tiempo real desde Supabase.
+- **Selección de Servicios**: Menú dinámico de servicios con precios que actualizan el total de la reserva al instante.
+- **Programación de Citas**: Calendario interactivo y selector de horarios (valida tiempos pasados y disponibilidad).
+- **Flujo Simplificado**: Proceso simple de 3 pasos: Seleccionar Servicio -> Seleccionar Fecha/Hora -> Confirmar.
+- **Gestión de Vehículos**: Registra el modelo del vehículo para cada cita.
+
+### 👤 Panel de Usuario (`/appointments`)
+- **Mis Citas**: Ver el estado de las reservas próximas y pasadas.
+- **Estado en Tiempo Real**: Indicadores (badges) para el estado de la cita (Confirmada, Pendiente, etc.).
+
+## Tecnologías (Tech Stack)
 
 - **Framework:** Next.js 15 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS
-- **UI Library:** shadcn-ui (Slate theme, CSS variables)
-- **Icons:** lucide-react
-- **Backend/Auth:** Supabase
+- **Lenguaje:** TypeScript
+- **Estilos:** Tailwind CSS
+- **Mapas:** React Leaflet & Leaflet (OSM tiles)
+- **Geocodificación:** Nominatim API
+- **Arquitectura UI:** componentes shadcn-ui
+- **Iconos:** lucide-react
+- **Backend/Auth:** Supabase (PostgreSQL)
 
-## Project Structure
+## Estructura del Proyecto
 
-- `src/app`: Application routes and pages.
-- `src/components/ui`: Reusable UI components (shadcn-ui).
-- `src/components/shared`: Shared components (Navbar, Footer, etc.).
-- `src/lib`: Utilities and API clients (Supabase client).
-- `src/types`: TypeScript type definitions.
-- `src/hooks`: Custom React hooks.
+- `src/app`: Rutas de la aplicación (`search`, `book`, `appointments`, `auth`).
+- `src/components/ui`: Componentes de UI reutilizables.
+- `src/components/shared`: Componentes específicos de funcionalidades (`WorkshopMap`, `FilterBar`, `WorkshopBookingClient`).
+- `src/lib`: Configuración de Supabase y utilidades.
+- `src/hooks`: Hooks personalizados (ej. `useLocation` para gestión de geolocalización).
 
-## Getting Started
+## Comenzando (Getting Started)
 
-1. Install dependencies:
+1. **Instalar dependencias:**
    ```bash
    npm install
    ```
 
-2. Set up environment variables in `.env.local` (copy from `.env.example` if available):
+2. **Configuración de Entorno:**
+   Crea un archivo `.env.local` con tus credenciales de Supabase:
    ```env
-   NEXT_PUBLIC_SUPABASE_URL=your-project-url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+   NEXT_PUBLIC_SUPABASE_URL=tu-url-del-proyecto
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
    ```
 
-3. Run the development server:
+3. **Ejecutar Servidor de Desarrollo:**
    ```bash
    npm run dev
    ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. **Explorar:**
+   - Ve a `/search` para buscar talleres.
+   - Haz clic en "Reservar" para probar el flujo de reserva.
+   - Revisa `/appointments` para ver tus citas.
