@@ -19,14 +19,23 @@ import { useRouter } from "next/navigation"
 export function ClientNavbar() {
     const pathname = usePathname()
     const router = useRouter()
-    const [email, setEmail] = useState<string | null>(null)
+    const [userEmail, setUserEmail] = useState<string>("Cargando...")
 
     useEffect(() => {
         const getUser = async () => {
-            const supabase = createBrowserClient()
-            const { data: { user } } = await supabase.auth.getUser()
-            if (user?.email) {
-                setEmail(user.email)
+            try {
+                const supabase = createBrowserClient()
+                const { data: { user }, error } = await supabase.auth.getUser()
+
+                if (error || !user) {
+                    setUserEmail("Invitado")
+                    return
+                }
+
+                setUserEmail(user.email || "Usuario sin email")
+            } catch (error) {
+                console.error("Error fetching user:", error)
+                setUserEmail("Invitado")
             }
         }
         getUser()
@@ -86,7 +95,7 @@ export function ClientNavbar() {
                                     <div className="flex flex-col space-y-1">
                                         <p className="text-sm font-medium leading-none">Mi Cuenta</p>
                                         <p className="text-xs leading-none text-muted-foreground">
-                                            {email || "Cargando..."}
+                                            {userEmail}
                                         </p>
                                     </div>
                                 </DropdownMenuLabel>

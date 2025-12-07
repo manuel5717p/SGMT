@@ -11,6 +11,15 @@ interface FilterBarProps {
     onCoordinatesChange?: (lat: number, lng: number) => void;
 }
 
+const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
+    'Lima': { lat: -12.0464, lng: -77.0428 },
+    'Piura': { lat: -5.1945, lng: -80.6328 },
+    'Arequipa': { lat: -16.4090, lng: -71.5375 },
+    'Callao': { lat: -12.0566, lng: -77.1180 },
+    'Cusco': { lat: -13.5320, lng: -71.9675 },
+    'Trujillo': { lat: -8.1160, lng: -79.0300 },
+};
+
 export function FilterBar({
     searchTerm,
     onSearchChange,
@@ -85,7 +94,7 @@ export function FilterBar({
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                                 <input
                                     type="text"
-                                    placeholder="Ingresar otro distrito o dirección"
+                                    placeholder="Ingrese su dirección. Ej: Los Olivos, Lima"
                                     className="w-full pl-9 pr-4 py-2 border rounded-lg text-sm bg-gray-50"
                                     onKeyDown={async (e) => {
                                         if (e.key === 'Enter') {
@@ -122,6 +131,10 @@ export function FilterBar({
                                             key={district}
                                             onClick={() => {
                                                 onLocationSelect(district);
+                                                const coords = CITY_COORDINATES[district];
+                                                if (coords && onCoordinatesChange) {
+                                                    onCoordinatesChange(coords.lat, coords.lng);
+                                                }
                                                 setIsLocationOpen(false);
                                             }}
                                             className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm transition-colors"

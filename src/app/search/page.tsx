@@ -29,28 +29,58 @@ export default function SearchPage() {
     // Casting to any to avoid strict RefObject<T> vs RefObject<T|null> issues for now if necessary, or just using RefObject<HTMLDivElement>
     const cardRefs = useRef<{ [key: string]: React.RefObject<HTMLDivElement | null> }>({});
 
+    // Debounce value for search
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+
     useEffect(() => {
-        fetchWorkshops();
-    }, []);
+        const timer = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
+        }, 500);
 
-    async function fetchWorkshops() {
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
+    // Fetch when debounced term changes (or initial load)
+    useEffect(() => {
+        fetchWorkshops(debouncedSearchTerm);
+    }, [debouncedSearchTerm]);
+
+    async function fetchWorkshops(term: string) {
         setLoading(true);
-        const { data, error } = await supabase
-            .from('workshops_with_rating')
-            .select('*');
+        let query = supabase.from('workshops_with_rating').select('*');
 
-        if (error) {
-            console.error('Error fetching workshops:', error);
+        // Use RPC if there is a search term
+        if (term.trim()) {
+            const { data, error } = await supabase
+                .rpc('search_workshops', { search_term: term });
+
+            if (error) {
+                console.error('Error searching workshops:', error);
+            } else {
+                setWorkshops(data || []);
+                initializeRefs(data || []);
+            }
         } else {
-            setWorkshops(data || []);
-            // Initialize refs
-            (data || []).forEach((w: Workshop) => {
-                // React.createRef returns { current: null } which is compatible with RefObject<HTMLDivElement | null>
-                cardRefs.current[w.id] = createRef<HTMLDivElement>();
-            });
+            // Fallback to default fetch
+            const { data, error } = await query;
+
+            if (error) {
+                console.error('Error fetching workshops:', error);
+            } else {
+                setWorkshops(data || []);
+                initializeRefs(data || []);
+            }
         }
         setLoading(false);
     }
+
+    const initializeRefs = (data: Workshop[]) => {
+        data.forEach((w: Workshop) => {
+            if (!cardRefs.current[w.id]) {
+                cardRefs.current[w.id] = createRef<HTMLDivElement>();
+            }
+        });
+    };
 
     const handleUseMyLocation = () => {
         requestLocation();
