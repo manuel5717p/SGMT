@@ -42,10 +42,7 @@ export function useLocation() {
         );
     };
 
-    // Initial load implies asking for location?? 
-    // Maybe not suitable to ask immediately on page load for UX, 
-    // but for a "Search near me" app it's often expected.
-    // We'll expose requestLocation so the button can trigger it or we can auto-trigger it.
+
 
     return { location, setLocation, error, loading, requestLocation, DEFAULT_LOCATION };
 }

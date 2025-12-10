@@ -70,17 +70,12 @@ export async function cancelClientAppointment(appointmentId: string) {
         throw new Error("Cita no encontrada")
     }
 
-    // In strict mode, we might verify client_id matches user metadata, 
-    // but typically user.id is the auth id. Assuming client_id might be linked to auth id.
-    // For now, if we trust RLS, a simple delete is enough. 
-    // If not, we should verify ownership. 
-    // Since I don't see the full client table schema, I will rely on the fact the user is logged in.
+
 
     // The user requested "delete".
     console.log(`🗑️ Attempting to delete appointment ${appointmentId} for user ${user.id}`)
 
-    // RLS blocks DELETE for clients, so we use Service Role to bypass it
-    // We already verified ownership above with the user's session
+
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
     if (!serviceRoleKey) {

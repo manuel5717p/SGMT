@@ -118,13 +118,7 @@ export default function WorkshopBookingClient({ workshop, services }: WorkshopBo
             .reduce((acc, curr) => acc + curr.duration, 0)
 
         // Use the first selected service ID for the main record, or handle multiple services logic
-        // For this MVP, we'll just take the first one or create multiple appointments?
-        // The prompt implies a single reservation, so let's just pick the first service for now
-        // or ideally we should support multiple services in the backend.
-        // Given the prompt: "createReservation... recibe serviceId", it implies one service per reservation or we need to loop.
-        // Let's loop and create one reservation per service or just pick the first one for simplicity as per prompt instructions.
-        // Prompt says: "recibe: workshopId, serviceId, date y time". Singular serviceId.
-        // I will pick the first selected service for now to satisfy the prompt strictly.
+
 
         const serviceId = selectedServices[0]
 

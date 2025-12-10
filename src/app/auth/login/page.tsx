@@ -26,7 +26,7 @@ export default function LoginPage() {
             }
             // If success, the server action redirects, so we don't need to do anything here
         } catch (e) {
-            // If redirect happens, it might throw an error in next.js, but usually it's fine.
+
             // However, if it's a real error:
             console.error(e)
             // setError("Ocurrió un error inesperado") 
@@ -35,10 +35,10 @@ export default function LoginPage() {
             // We don't set loading to false if redirecting, to prevent UI flash
             // But if error, we do.
             // Since we can't easily distinguish redirect error from others without checking message,
-            // we'll rely on the server action returning error object if it failed.
+
             // If it throws (redirect), this finally block runs.
             // Let's check if we are still on the page? No easy way.
-            // We'll just set loading false after a timeout or if error is set.
+
             setIsLoading(false)
         }
     }

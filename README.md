@@ -1,46 +1,60 @@
-# Plataforma SaaS para Talleres de Motos
+# Plataforma SaaS para Talleres de Motos - MOTOFIX
 
-Esta es una aplicación SaaS integral para descubrir y reservar servicios en talleres de motocicletas, construida con Next.js 15, Supabase y Tailwind CSS.
+Esta es una aplicación SaaS integral para conectar motociclistas con talleres mecánicos de confianza. Permite a los usuarios encontrar servicios, agendar citas y gestionar el mantenimiento de su vehículo, y a los talleres administrar su negocio de manera digital.
 
-## Características
+Construida con **Next.js 15**, **Supabase** y **Tailwind CSS**.
+
+## Características Principales
+
+### 🏠 Landing Page & Roles
+- **Selección de Rol**: Portal de inicio intuitivo para ingresar como "Mi Vehículo" (Usuario) o "Mi Taller" (Administrador).
+- **Diseño Responsivo**: Interfaz moderna y adaptada a dispositivos móviles.
 
 ### 🔍 Búsqueda y Descubrimiento (`/search`)
-- **Diseño de Vista Dual**: Interfaz de pantalla dividida con un mapa dinámico y una lista de talleres.
-- **Mapa Interactivo**: Impulsado por **Leaflet**, con marcadores personalizados, animaciones de zoom suaves (`FlyTo`) y seguimiento de ubicación del usuario.
-- **Filtrado Avanzado**: Filtra talleres por nombre de servicio, tipo de problema o ubicación.
-- **Servicios de Ubicación**:
-    - **Geolocalización**: Detecta automáticamente la posición del usuario para cálculos de distancia.
-    - **Búsqueda de Direcciones**: Integración con **Nominatim API** (OpenStreetMap) para buscar distritos o direcciones específicas en Perú.
+- **Diseño de Vista Dual**: Mapa interactivo y lista de talleres en pantalla dividida.
+- **Geolocalización**: Detección automática de ubicación y cálculo de distancias.
+- **Filtrado Expresivo**: Búsqueda por servicio (ej. "Cambio de Aceite"), tipo de problema o ubicación.
+- **Mapas**: Integración con Leaflet y OpenStreetMap.
 
-### 📅 Sistema de Reservas (`/book/[id]`)
-- **Páginas Dinámicas de Talleres**: Obtiene detalles del taller, imágenes y horarios de atención en tiempo real desde Supabase.
-- **Selección de Servicios**: Menú dinámico de servicios con precios que actualizan el total de la reserva al instante.
-- **Programación de Citas**: Calendario interactivo y selector de horarios (valida tiempos pasados y disponibilidad).
-- **Flujo Simplificado**: Proceso simple de 3 pasos: Seleccionar Servicio -> Seleccionar Fecha/Hora -> Confirmar.
-- **Gestión de Vehículos**: Registra el modelo del vehículo para cada cita.
+### 📅 Reservas & Usuarios (`/appointments`)
+- **Agendamiento Inteligente**: Selección de fecha y hora con validación de disponibilidad.
+- **Gestión de Citas**: Panel para ver citas próximas, pasadas y canceladas.
+- **Sistema de Reseñas**: Los usuarios pueden calificar y dejar comentarios sobre el servicio recibido una vez finalizada la cita.
+- **Perfil de Usuario**: Gestión de sesión segura.
 
-### 👤 Panel de Usuario (`/appointments`)
-- **Mis Citas**: Ver el estado de las reservas próximas y pasadas.
-- **Estado en Tiempo Real**: Indicadores (badges) para el estado de la cita (Confirmada, Pendiente, etc.).
+### 🛠️ Panel de Administración (`/admin`)
+Herramientas completas para dueños de talleres:
+- **Dashboard**: Vista general de la actividad del negocio.
+- **Gestión de Citas**:
+    - **Calendario**: Visualización visual de horarios ocupados.
+    - **Listado**: Tabla detallada con estado (Confirmado, Completado, Cancelado).
+    - **Walk-in**: Registro de citas presenciales (clientes sin app).
+- **Servicios**: ABM (Alta, Baja, Modificación) de catálogo de servicios con precios y duraciones.
+- **Perfil del Taller**: Configuración de información pública del negocio.
 
 ## Tecnologías (Tech Stack)
 
-- **Framework:** Next.js 15 (App Router)
+- **Frontend:** Next.js 15 (App Router), React 19
 - **Lenguaje:** TypeScript
-- **Estilos:** Tailwind CSS
-- **Mapas:** React Leaflet & Leaflet (OSM tiles)
-- **Geocodificación:** Nominatim API
-- **Arquitectura UI:** componentes shadcn-ui
+- **Estilos:** Tailwind CSS v4, shadcn/ui
+- **Mapas:** React Leaflet & Leaflet, Nominatim API
 - **Iconos:** lucide-react
-- **Backend/Auth:** Supabase (PostgreSQL)
+- **Notificaciones:** sonner (Toasts)
+- **Backend & Base de Datos:** Supabase (PostgreSQL)
+- **Autenticación:** Supabase Auth
 
 ## Estructura del Proyecto
 
-- `src/app`: Rutas de la aplicación (`search`, `book`, `appointments`, `auth`).
-- `src/components/ui`: Componentes de UI reutilizables.
-- `src/components/shared`: Componentes específicos de funcionalidades (`WorkshopMap`, `FilterBar`, `WorkshopBookingClient`).
-- `src/lib`: Configuración de Supabase y utilidades.
-- `src/hooks`: Hooks personalizados (ej. `useLocation` para gestión de geolocalización).
+- `src/app`
+    - `(public)`: Rutas públicas (`search`, `book`).
+    - `admin`: Panel de control protegido para talleres (`dashboard`, `services`, `appointments`).
+    - `auth`: Rutas de autenticación.
+    - `appointments`: Panel de usuario final.
+- `src/components`
+    - `ui`: Componentes base (shadcn/ui).
+    - `shared`: Componentes reutilizables de negocio (`AppointmentCard`, `ServicesList`).
+- `src/lib`: Clientes de Supabase y utilidades (fecha, formato moneda).
+- `src/actions`: Server Actions para mutaciones de datos.
 
 ## Comenzando (Getting Started)
 
@@ -52,7 +66,7 @@ Esta es una aplicación SaaS integral para descubrir y reservar servicios en tal
 2. **Configuración de Entorno:**
    Crea un archivo `.env.local` con tus credenciales de Supabase:
    ```env
-   NEXT_PUBLIC_SUPABASE_URL=tu-url-del-proyecto
+   NEXT_PUBLIC_SUPABASE_URL=tu-url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
    ```
 
@@ -61,7 +75,6 @@ Esta es una aplicación SaaS integral para descubrir y reservar servicios en tal
    npm run dev
    ```
 
-4. **Explorar:**
-   - Ve a `/search` para buscar talleres.
-   - Haz clic en "Reservar" para probar el flujo de reserva.
-   - Revisa `/appointments` para ver tus citas.
+4. **Demo:**
+   - **Usuario**: Ve a `/search`, busca un taller y agenda una cita.
+   - **Admin**: Ingresa a `/admin/dashboard` para gestionar tu taller.

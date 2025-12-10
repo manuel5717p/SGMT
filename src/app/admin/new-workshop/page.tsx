@@ -133,7 +133,7 @@ export default function NewWorkshopPage() {
             const data = await response.json()
             if (data && data.display_name) {
                 // Construct a shorter address if possible, or use display_name
-                // display_name is usually very long, let's try to get road + house_number if available
+
                 const addr = data.address
                 let formattedAddress = data.display_name
 

@@ -99,10 +99,7 @@ export async function loginUser(formData: FormData) {
         return { error: error.message }
     }
 
-    // Redirect based on role? 
-    // For now, we'll redirect to a generic dashboard or let the client handle it.
-    // But Server Actions with redirect are better.
-    // We need to fetch the profile to know the role.
+
 
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -136,23 +133,9 @@ export async function getDashboardAppointments(dateString?: string) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: "No authenticated user" }
 
-    // Get user's workshop (assuming 1:1 for now, or pick first)
-    // We need to know which workshop the admin manages.
-    // Assuming 'mechanics' table links user to workshop? Or 'profiles' has workshop_id?
-    // The prompt says "Filtra por workshop_id (el taller del usuario logueado)".
-    // Let's assume the user is a mechanic/admin and has a workshop_id in their profile OR we find a mechanic record for them.
-    // Let's check if 'mechanics' table has 'user_id' or if 'profiles' has 'workshop_id'.
-    // Based on previous debug, 'mechanics' has 'id', 'workshop_id', 'name'. It doesn't seem to have 'user_id'.
-    // Maybe 'profiles' has it? Debug output for profiles was empty.
-    // Let's assume for now we fetch the first workshop found for the user, or just ALL appointments if we can't filter (for demo).
-    // BETTER: Fetch the workshop where the user is the owner (if workshops table has owner_id).
-    // Let's try to fetch a workshop where owner_id = user.id.
+
 
     const { data: workshop } = await supabase.from('workshops').select('id').eq('owner_id', user.id).single()
-
-    // If no workshop owned, maybe they are just a mechanic? 
-    // For this task, I will assume the user OWNS a workshop.
-
     let workshopId = workshop?.id
 
     // Fallback for demo: if no workshop found, use a hardcoded one or the first one in DB
@@ -209,7 +192,6 @@ export async function getDashboardAppointments(dateString?: string) {
         // Format HH:MM
         const formatTime = (date: Date) => date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false })
 
-        // Supabase returns arrays for joins usually, unless 1:1 is strictly inferred.
         // We cast to any to avoid complex type definition for now, or access as array if needed.
         // Based on lint error, it is an array.
         const service = Array.isArray(app.service) ? app.service[0] : app.service
