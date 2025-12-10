@@ -2,7 +2,10 @@ import Link from "next/link"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
-import { Motorcycle, Wrench } from "lucide-react"
+import { Bike, Wrench } from "lucide-react"
+
+// 1. IMPORTAMOS LA IMAGEN QUE SÍ EXISTE (El ícono verde)
+import logo from "./favicon.ico"
 
 export default function Home() {
   return (
@@ -10,25 +13,25 @@ export default function Home() {
       {/* Navbar Modificado */}
       <header className="w-full bg-white py-4 shadow-sm">
         <div className="container mx-auto px-4 flex justify-between items-center">
-          
+
           {/* UNIFICACIÓN: Contenedor único con flex y gap-0 para pegar logo y texto */}
           <div className="flex items-center gap-0">
-            {/* Componente de Imagen - Asegúrate de que el tamaño (width/height) sea adecuado */}
+            {/* 2. USAMOS LA VARIABLE IMPORTADA 'logo' EN LUGAR DE TEXTO */}
             <Image
-              src="/logo.png" // Cambié /favicon.ico a /logo.png para mejor semántica, ajústalo si usas otro nombre
+              src={logo}
               alt="Logo Motofix"
-              width={50} // Reducido para mejor alineación en la navbar
-              height={50} // Reducido para mejor alineación en la navbar
-              className="rounded-full object-cover" // Añadí clases de estilo
+              width={50}
+              height={50}
+              className="rounded-full object-cover"
             />
-            
+
             {/* Texto MOTOFIX */}
-            <div className="text-left ml-2"> {/* Agregué ml-2 para un pequeño espacio visual después del logo */}
+            <div className="text-left ml-2">
               <h1 className="text-2xl font-bold text-slate-900 tracking-tight">MOTOFIX</h1>
               <p className="text-xs text-slate-500 uppercase tracking-widest">Tu mejor opción</p>
             </div>
           </div>
-          
+
           {/* Opciones de navegación a la derecha */}
           <nav className="flex gap-3 text-sm font-medium text-slate-600">
             {/* Solo 'Inicio' y 'Contacto' */}
@@ -46,13 +49,13 @@ export default function Home() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 w-full max-w-4xl">
-          
+
           {/* Card: Mi Vehículo (Con ÍCONO DE MOTO) */}
           <Card className="border-none shadow-md transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-2xl hover:-translate-y-1 cursor-pointer bg-white group">
             <CardHeader className="flex flex-col items-center pt-10 pb-2">
               {/* Ícono de Moto */}
               <div className="h-24 w-24 flex items-center justify-center rounded-full bg-primary mb-6 transition-transform duration-300 group-hover:scale-110">
-                <Motorcycle className="h-12 w-12 text-white" />
+                <Bike className="h-12 w-12 text-white" />
               </div>
               <h3 className="text-xl font-bold text-slate-900">Mi Vehículo</h3>
             </CardHeader>
@@ -71,7 +74,7 @@ export default function Home() {
           {/* Card: Mi Taller (Con ÍCONO DE LLAVE) */}
           <Card className="border-none shadow-md transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-2xl hover:-translate-y-1 cursor-pointer bg-white group">
             <CardHeader className="flex flex-col items-center pt-10 pb-2">
-               {/* Ícono de Llave de taller */}
+              {/* Ícono de Llave de taller */}
               <div className="h-24 w-24 flex items-center justify-center rounded-full bg-primary mb-6 transition-transform duration-300 group-hover:scale-110">
                 <Wrench className="h-12 w-12 text-white" />
               </div>
