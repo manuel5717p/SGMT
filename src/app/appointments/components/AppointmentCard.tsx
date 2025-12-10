@@ -4,6 +4,8 @@ import { useState } from "react"
 import { Calendar, Clock, MapPin, Wrench, Star } from "lucide-react"
 import { ReviewModal } from "./ReviewModal"
 import Link from "next/link"
+import { cancelClientAppointment } from "../actions"
+import { toast } from "sonner"
 
 interface AppointmentCardProps {
     appointment: any // Using any for flexibility based on the Supabase join structure
@@ -11,6 +13,8 @@ interface AppointmentCardProps {
 
 export function AppointmentCard({ appointment }: AppointmentCardProps) {
     const [isReviewOpen, setIsReviewOpen] = useState(false)
+    const [isDeleted, setIsDeleted] = useState(false)
+    const [isCancelling, setIsCancelling] = useState(false)
 
     const workshop = Array.isArray(appointment.workshop) ? appointment.workshop[0] : appointment.workshop
     const service = Array.isArray(appointment.service) ? appointment.service[0] : appointment.service
@@ -58,6 +62,24 @@ export function AppointmentCard({ appointment }: AppointmentCardProps) {
     }
 
     const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
+
+    const handleCancel = async () => {
+        if (appointment.status !== 'confirmed') return
+
+        try {
+            setIsCancelling(true)
+            await cancelClientAppointment(appointment.id)
+            setIsDeleted(true)
+            toast.success("Cita cancelada exitosamente")
+        } catch (error) {
+            console.error(error)
+            toast.error("Error al cancelar la cita")
+        } finally {
+            setIsCancelling(false)
+        }
+    }
+
+    if (isDeleted) return null
 
     return (
         <>
@@ -137,8 +159,12 @@ export function AppointmentCard({ appointment }: AppointmentCardProps) {
                                     <Link href="#" className="text-sm font-medium text-blue-600 hover:underline">
                                         Ver detalles
                                     </Link>
-                                    <button className="text-sm font-medium text-red-500 hover:text-red-600">
-                                        Cancelar
+                                    <button
+                                        onClick={handleCancel}
+                                        disabled={isCancelling}
+                                        className="text-sm font-medium text-red-500 hover:text-red-600 disabled:opacity-50"
+                                    >
+                                        {isCancelling ? "Cancelando..." : "Cancelar"}
                                     </button>
                                 </>
                             )}

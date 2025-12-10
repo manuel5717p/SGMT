@@ -129,7 +129,7 @@ export async function signOutAction() {
     redirect('/')
 }
 
-export async function getDashboardAppointments() {
+export async function getDashboardAppointments(dateString?: string) {
     const supabase = await createClient()
 
     // Get current user
@@ -163,10 +163,20 @@ export async function getDashboardAppointments() {
 
     if (!workshopId) return { appointments: [] } // No workshop, no appointments
 
-    // Get today's date range
-    const today = new Date()
-    const startOfDay = new Date(today.setHours(0, 0, 0, 0)).toISOString()
-    const endOfDay = new Date(today.setHours(23, 59, 59, 999)).toISOString()
+    // TIMEZONE FIX: Create date range matching Peru timezone (-05:00)
+    // The dateString comes in YYYY-MM-DD format
+    // We need to query for all appointments that fall within this LOCAL day
+    // Since appointments are stored with -05:00 offset, we need to convert our range accordingly
+
+    const targetDate = dateString ? new Date(dateString + 'T00:00:00') : new Date()
+
+    // Create start of day: YYYY-MM-DD 00:00:00 -05:00
+    const year = targetDate.getFullYear()
+    const month = String(targetDate.getMonth() + 1).padStart(2, '0')
+    const day = String(targetDate.getDate()).padStart(2, '0')
+
+    const startOfDayUTC = `${year}-${month}-${day}T00:00:00-05:00`
+    const endOfDayUTC = `${year}-${month}-${day}T23:59:59-05:00`
 
     const { data: appointments, error } = await supabase
         .from('appointments')
@@ -176,13 +186,15 @@ export async function getDashboardAppointments() {
       end_time,
       vehicle_model,
       status,
+      source,
+      client_name,
       service:services(name),
       mechanic:mechanics(name),
       client:profiles(full_name)
     `)
         .eq('workshop_id', workshopId)
-        .gte('start_time', startOfDay)
-        .lte('start_time', endOfDay)
+        .gte('start_time', startOfDayUTC)
+        .lte('start_time', endOfDayUTC)
 
     if (error) {
         console.error("Error fetching appointments:", error)
@@ -211,7 +223,9 @@ export async function getDashboardAppointments() {
             title: app.vehicle_model || "Vehículo sin modelo",
             subtitle: service?.name || "Servicio General",
             mechanic: mechanic?.name,
-            client: client?.full_name || "Cliente Presencial",
+            client: client?.full_name,
+            client_name: app.client_name,
+            source: app.source || 'web',
             type: client ? 'web' : 'walk-in', // If linked to profile, it's web/app. If not, walk-in.
             status: app.status || (client ? 'Reserva Web' : 'Sin cita previa')
         }

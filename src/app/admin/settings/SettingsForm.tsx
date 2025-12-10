@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { updateWorkshopSettings } from "@/app/admin/actions"
-import { Crown, AlertTriangle, Lock, Check } from "lucide-react"
+import { Crown, AlertTriangle, Lock, Check, Building2, MapPin, Phone } from "lucide-react"
 
 interface SettingsFormProps {
     workshop: any
@@ -17,7 +17,8 @@ export function SettingsForm({ workshop }: SettingsFormProps) {
     const [capacity, setCapacity] = useState(workshop.simultaneous_capacity || 1)
     const [showSuccess, setShowSuccess] = useState(false)
 
-    const isFreePlan = true // Hardcoded for now as per requirements logic
+    // Dynamic plan detection based on simultaneous_capacity
+    const isFreePlan = workshop.simultaneous_capacity === 1
 
     async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -137,18 +138,44 @@ export function SettingsForm({ workshop }: SettingsFormProps) {
                 <CardContent>
                     <form onSubmit={onSubmit} className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="name">Nombre del taller</Label>
-                            <Input id="name" name="name" defaultValue={workshop.name} required />
+                            <Label htmlFor="name" className="flex items-center gap-2 text-slate-600">
+                                <Building2 className="h-4 w-4" />
+                                Nombre del taller
+                            </Label>
+                            <Input
+                                id="name"
+                                name="name"
+                                defaultValue={workshop.name}
+                                placeholder="Ej: Taller Pedrito"
+                                required
+                            />
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="address">Dirección</Label>
-                            <Input id="address" name="address" defaultValue={workshop.address} required />
+                            <Label htmlFor="address" className="flex items-center gap-2 text-slate-600">
+                                <MapPin className="h-4 w-4" />
+                                Dirección
+                            </Label>
+                            <Input
+                                id="address"
+                                name="address"
+                                defaultValue={workshop.address}
+                                placeholder="Ej: Av. Principal 123, Lima"
+                                required
+                            />
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="phone">Teléfono</Label>
-                            <Input id="phone" name="phone" defaultValue={workshop.phone || ""} placeholder="+51 999 999 999" />
+                            <Label htmlFor="phone" className="flex items-center gap-2 text-slate-600">
+                                <Phone className="h-4 w-4" />
+                                Teléfono
+                            </Label>
+                            <Input
+                                id="phone"
+                                name="phone"
+                                defaultValue={workshop.phone || ""}
+                                placeholder="Ej: +51 999 888 777"
+                            />
                         </div>
 
                         <div className="pt-4">

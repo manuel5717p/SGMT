@@ -1,49 +1,64 @@
-import { createClient } from "@/lib/supabase-server"
-import { redirect } from "next/navigation"
-import { ServicesList } from "./services-list"
-import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
+import {
+    Calendar,
+    Wrench,
+    Settings,
+} from "lucide-react"
+import Link from "next/link"
+import ServicesList from "@/components/admin/ServicesList"
+import { getServices } from "@/app/admin/actions"
+import { AdminUserMenu } from "@/components/admin/AdminUserMenu"
 
 export default async function ServicesPage() {
-    const supabase = await createClient()
-
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) redirect('/auth/login')
-
-    const { data: workshop } = await supabase
-        .from('workshops')
-        .select('id')
-        .eq('owner_id', user.id)
-        .single()
-
-    if (!workshop) redirect('/admin/new-workshop')
-
-    const { data: services } = await supabase
-        .from('services')
-        .select('*')
-        .eq('workshop_id', workshop.id)
-        .order('created_at', { ascending: false })
+    console.log('[ServicesPage] Page loading - calling getServices...')
+    const services = await getServices()
+    console.log('[ServicesPage] getServices returned:', services)
+    console.log('[ServicesPage] services.length:', services?.length || 0)
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold text-slate-900">Servicios</h1>
-                {/* The button is handled in the client component for the dialog trigger, 
-                    but the prompt asks for the button in the header. 
-                    I will pass the trigger to the client component or make the button trigger the dialog from outside.
-                    Better: Pass the button as a child or just render the ServicesList which includes the header actions?
-                    The prompt says: "Header: Título... y un botón...".
-                    I'll put the button inside ServicesList to control the Dialog state easily.
-                    Wait, the prompt says "Header: Título... y un botón...".
-                    I will render the title here and the ServicesList below. 
-                    Actually, to open the dialog from the header button, I need shared state.
-                    I will make ServicesList handle the whole section including the header button for simplicity,
-                    OR I will wrap everything in a client component.
-                    Let's make ServicesList the main container that accepts initialServices.
-                */}
-            </div>
+        <div className="flex min-h-screen bg-slate-50">
+            {/* Sidebar */}
+            <aside className="w-64 bg-white border-r border-slate-200 hidden md:flex flex-col">
+                <div className="p-6">
+                    <h1 className="text-xl font-bold text-slate-800">Gestión Taller</h1>
+                </div>
+                <nav className="flex-1 px-4 space-y-2">
+                    <Link
+                        href="/admin/dashboard"
+                        className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-lg font-medium transition-colors"
+                    >
+                        <Calendar className="h-5 w-5" />
+                        Calendario
+                    </Link>
+                    <Link
+                        href="/admin/services"
+                        className="flex items-center gap-3 px-4 py-3 bg-green-50 text-green-600 rounded-lg font-medium"
+                    >
+                        <Wrench className="h-5 w-5" />
+                        Servicios
+                    </Link>
+                    <Link
+                        href="/admin/settings"
+                        className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-lg font-medium transition-colors"
+                    >
+                        <Settings className="h-5 w-5" />
+                        Configuración
+                    </Link>
+                </nav>
+            </aside>
 
-            <ServicesList initialServices={services || []} />
+            {/* Main Content */}
+            <main className="flex-1 flex flex-col min-w-0">
+                <header className="bg-white border-b border-slate-200 px-6 py-4">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-lg font-medium text-slate-700">Servicios</h2>
+                        <AdminUserMenu />
+                    </div>
+                </header>
+
+                <div className="p-6">
+                    <ServicesList initialServices={services} />
+                </div>
+            </main>
         </div>
     )
 }

@@ -7,6 +7,9 @@ export interface Workshop {
     location_lat: number;
     location_lng: number;
     distance?: number;
+    city?: string;
+    district?: string;
+    phone?: string;
     // Add other fields if necessary
 }
 

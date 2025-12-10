@@ -52,7 +52,7 @@ export default function SearchPage() {
         // Use RPC if there is a search term
         if (term.trim()) {
             const { data, error } = await supabase
-                .rpc('search_workshops', { search_term: term });
+                .rpc<Workshop[]>('search_workshops', { search_term: term });
 
             if (error) {
                 console.error('Error searching workshops:', error);
