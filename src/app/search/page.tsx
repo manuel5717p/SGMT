@@ -52,13 +52,13 @@ export default function SearchPage() {
         // Use RPC if there is a search term
         if (term.trim()) {
             const { data, error } = await supabase
-                .rpc<Workshop[]>('search_workshops', { search_term: term });
+                .rpc('search_workshops', { search_term: term });
 
             if (error) {
                 console.error('Error searching workshops:', error);
             } else {
-                setWorkshops(data || []);
-                initializeRefs(data || []);
+                setWorkshops((data as Workshop[]) || []);
+                initializeRefs((data as Workshop[]) || []);
             }
         } else {
             // Fallback to default fetch
@@ -67,8 +67,8 @@ export default function SearchPage() {
             if (error) {
                 console.error('Error fetching workshops:', error);
             } else {
-                setWorkshops(data || []);
-                initializeRefs(data || []);
+                setWorkshops((data as Workshop[]) || []);
+                initializeRefs((data as Workshop[]) || []);
             }
         }
         setLoading(false);
