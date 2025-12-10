@@ -5,6 +5,7 @@ import "./globals.css";
 import image from "./favicon.ico";
 
 import { Toaster } from "sonner";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
   title: "MotoFix",
@@ -24,6 +25,7 @@ export default function RootLayout({
       <body className="antialiased">
         {children}
         <Toaster position="top-right" richColors />
+        <SpeedInsights />
       </body>
     </html>
   );
