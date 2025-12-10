@@ -47,6 +47,7 @@ Herramientas completas para dueños de talleres:
 
 - `src/app`
     - `(public)`: Rutas públicas (`search`, `book`).
+    - `public/muckups`: Muckups y diseños visuales de la aplicación.
     - `admin`: Panel de control protegido para talleres (`dashboard`, `services`, `appointments`).
     - `auth`: Rutas de autenticación.
     - `appointments`: Panel de usuario final.
@@ -55,6 +56,7 @@ Herramientas completas para dueños de talleres:
     - `shared`: Componentes reutilizables de negocio (`AppointmentCard`, `ServicesList`).
 - `src/lib`: Clientes de Supabase y utilidades (fecha, formato moneda).
 - `src/actions`: Server Actions para mutaciones de datos.
+- `supabase`: Contiene el esquema de la base de datos (`schema.sql`) para inicializar el proyecto.
 
 ## Comenzando (Getting Started)
 
@@ -63,18 +65,24 @@ Herramientas completas para dueños de talleres:
    npm install
    ```
 
-2. **Configuración de Entorno:**
+2. **Configurar Base de Datos en Supabase:**
+   - Ve a tu proyecto en [Supabase Dashboard](https://app.supabase.com)
+   - Abre el **SQL Editor**
+   - Copia y ejecuta el contenido de `supabase/schema.sql` para crear las tablas, políticas RLS y datos iniciales
+
+3. **Configuración de Entorno:**
    Crea un archivo `.env.local` con tus credenciales de Supabase:
    ```env
    NEXT_PUBLIC_SUPABASE_URL=tu-url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
+   SUPABASE_SERVICE_ROLE_KEY=tu-service-role-key
    ```
 
-3. **Ejecutar Servidor de Desarrollo:**
+4. **Ejecutar Servidor de Desarrollo:**
    ```bash
    npm run dev
    ```
 
-4. **Demo:**
+5. **Demo:**
    - **Usuario**: Ve a `/search`, busca un taller y agenda una cita.
    - **Admin**: Ingresa a `/admin/dashboard` para gestionar tu taller.
